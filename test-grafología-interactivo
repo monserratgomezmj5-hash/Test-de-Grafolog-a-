@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test de Grafología</title>
+<style>
+:root{
+  --navy:#102f57; --blue:#3d79ad; --light:#eef5fa; --line:#a9c9e4;
+  --cream:#faf8f2; --gold:#e7c88a; --text:#17385f;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; min-height:100vh; font-family:Arial,Helvetica,sans-serif;
+  color:var(--text); background:
+  radial-gradient(circle at 5% 15%, #dcebf5 0 90px, transparent 91px),
+  radial-gradient(circle at 98% 4%, #d7e7f3 0 130px, transparent 131px),
+  linear-gradient(135deg,#fbfaf6 0%,#f4f8fb 100%);
+}
+.page{max-width:1280px;margin:auto;padding:38px 48px 28px}
+.header{display:flex;justify-content:space-between;gap:35px;align-items:flex-start}
+.brand{display:flex;gap:18px;align-items:flex-start}
+.pen-icon{font-size:48px}
+.kicker{font-size:18px;letter-spacing:4px;text-transform:uppercase;margin-top:3px}
+h1{font-size:58px;line-height:.95;margin:4px 0 13px;font-weight:800;color:var(--navy)}
+.subtitle{font-size:24px;letter-spacing:4px}
+.question{max-width:390px;font-size:29px;line-height:1.15;font-weight:700;font-style:italic;margin-top:18px}
+.question span{display:block;border-bottom:3px solid #6ea4cd;width:290px;padding-bottom:8px}
+.content{display:grid;grid-template-columns:1fr 390px;gap:34px;margin-top:30px}
+.card{background:rgba(255,255,255,.8);border:2px solid #8bb4d6;border-radius:26px;box-shadow:0 14px 35px rgba(27,67,100,.10)}
+.canvas-card{padding:18px}
+.canvas-head{display:flex;justify-content:space-between;align-items:center;padding:5px 12px 13px}
+.canvas-title{font-size:20px;font-weight:700}
+.status{font-size:13px;color:#6b879f}
+.canvas-wrap{height:500px;border:2px dashed var(--line);border-radius:18px;background:#fff;position:relative;overflow:hidden}
+canvas{width:100%;height:100%;display:block;touch-action:none;cursor:crosshair}
+.placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;color:#82a6c4;font-size:22px;font-weight:600}
+.placeholder .pencil{font-size:36px;display:block;text-align:center;margin-bottom:8px}
+.controls{display:flex;gap:12px;justify-content:flex-end;padding-top:15px}
+button{border:0;border-radius:12px;padding:12px 18px;font-size:15px;font-weight:700;cursor:pointer}
+.clear{background:#edf3f7;color:var(--navy)}
+.finish{background:var(--navy);color:white}
+.finish:hover{background:#204b7c}
+.side{display:flex;flex-direction:column;gap:16px}
+.info{border-radius:24px;padding:24px 25px;background:rgba(238,245,250,.9)}
+.info h2{margin:0 0 18px;font-size:25px;color:var(--navy)}
+.step{display:flex;gap:15px;margin:16px 0;align-items:flex-start}
+.num{min-width:36px;height:36px;border-radius:50%;background:#3d79ad;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800}
+.step p{margin:3px 0 0;font-size:17px;line-height:1.4}
+.note{background:#e8f1f7;border-radius:24px;padding:23px 25px}
+.note h3{margin:0 0 9px;font-size:21px}
+.note p{margin:0;line-height:1.45;font-size:15px}
+.footer{text-align:center;margin-top:23px;font-size:16px;letter-spacing:4px;color:var(--navy)}
+@media(max-width:900px){
+ .page{padding:24px 18px}.header{display:block}h1{font-size:43px}.subtitle{font-size:17px}.question{display:none}
+ .content{grid-template-columns:1fr}.canvas-wrap{height:430px}
+}
+
+.result-overlay{
+  position:fixed;inset:0;background:rgba(10,35,62,.72);backdrop-filter:blur(7px);
+  display:none;align-items:center;justify-content:center;padding:22px;z-index:20;
+}
+.result-overlay.show{display:flex}
+.result-card{
+  width:min(720px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:30px;
+  box-shadow:0 30px 80px rgba(0,0,0,.28);padding:34px;color:var(--text);position:relative;
+}
+.result-card h2{font-size:39px;color:var(--navy);margin:0 0 6px;text-align:center}
+.result-sub{text-align:center;color:#6c879f;margin:0 0 25px;font-size:16px}
+.loading{text-align:center;padding:35px 0}
+.spinner{width:54px;height:54px;border:5px solid #dceaf4;border-top-color:var(--blue);
+ border-radius:50%;margin:0 auto 18px;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.traits{display:grid;grid-template-columns:repeat(2,1fr);gap:13px;margin-top:20px}
+.trait{background:#f2f7fa;border-radius:18px;padding:18px;border-left:4px solid #6ea4cd}
+.trait b{display:block;color:var(--navy);font-size:18px;margin-bottom:7px}
+.trait span{font-size:15px;line-height:1.4;color:#42617c}
+.profile-intro{background:linear-gradient(135deg,#edf5fa,#f8fbfd);border-radius:20px;padding:18px 20px;margin-bottom:18px}
+.profile-intro .label{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#6d8ca6;font-weight:700}
+.profile-intro .headline{font-size:25px;font-weight:800;color:var(--navy);margin-top:5px}
+.disclaimer-mini{text-align:center;font-size:11px;color:#7890a4;margin-top:18px;line-height:1.4}
+.signature-preview{height:125px;border:1px dashed #b9d0e2;border-radius:16px;background:#fafcfd;
+display:flex;align-items:center;justify-content:center;margin:10px 0 20px;overflow:hidden}
+.signature-preview img{max-width:90%;max-height:105px}
+.close-result{display:block;margin:25px auto 0;background:var(--navy);color:white;padding:13px 24px}
+@media(max-width:600px){.traits{grid-template-columns:1fr}.result-card{padding:24px}.result-card h2{font-size:30px}}
+
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="header">
+    <div class="brand">
+      <div class="pen-icon">✎</div>
+      <div>
+        <div class="kicker">Actividad interactiva</div>
+        <h1>Test de<br>Grafología</h1>
+        <div class="subtitle">Tu firma también habla de ti</div>
+      </div>
+    </div>
+    <div class="question">¿Qué dice tu firma sobre<br>tu personalidad?<span></span></div>
+  </header>
+
+  <main class="content">
+    <section class="card canvas-card">
+      <div class="canvas-head">
+        <div class="canvas-title">✎ Dibuja aquí tu firma</div>
+        <div class="status" id="status">Listo para comenzar</div>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="signature"></canvas>
+        <div class="placeholder" id="placeholder">
+          <div><span class="pencil">✎</span>Firma aquí con el mouse o tu dedo</div>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="clear" id="clear">Borrar firma</button>
+        <button class="finish" id="finish">Finalizar firma →</button>
+      </div>
+    </section>
+
+    <aside class="side">
+      <section class="info">
+        <h2>Instrucciones</h2>
+        <div class="step"><div class="num">1</div><p>Dibuja tu firma dentro del recuadro.</p></div>
+        <div class="step"><div class="num">2</div><p>Hazla como normalmente firmas, sin intentar que quede perfecta.</p></div>
+        <div class="step"><div class="num">3</div><p>No escribas tu nombre aparte: deja que tu firma hable por sí sola.</p></div>
+        <div class="step"><div class="num">4</div><p>Cuando termines, pulsa <b>“Finalizar firma”</b>.</p></div>
+      </section>
+      <section class="note">
+        <h3>💡 Recuerda</h3>
+        <p>La grafología se presenta aquí como una actividad recreativa y de interpretación. No es un método científico validado para determinar la personalidad.</p>
+      </section>
+    </aside>
+  </main>
+
+  <div class="footer">TU FIRMA &nbsp;•&nbsp; TU ESTILO &nbsp;•&nbsp; TU ESENCIA</div>
+</div>
+
+<script>
+const canvas=document.getElementById('signature');
+const ctx=canvas.getContext('2d');
+const placeholder=document.getElementById('placeholder');
+const status=document.getElementById('status');
+let drawing=false, hasInk=false;
+
+function resize(){
+  const old=document.createElement('canvas');
+  old.width=canvas.width; old.height=canvas.height;
+  if(canvas.width && canvas.height) old.getContext('2d').drawImage(canvas,0,0);
+  const r=canvas.getBoundingClientRect(), d=window.devicePixelRatio||1;
+  canvas.width=Math.round(r.width*d); canvas.height=Math.round(r.height*d);
+  ctx.scale(d,d);
+  ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle='#102f57'; ctx.lineWidth=3;
+  if(old.width) ctx.drawImage(old,0,0,old.width,old.height,0,0,r.width,r.height);
+}
+function pos(e){
+  const r=canvas.getBoundingClientRect();
+  return {x:e.clientX-r.left,y:e.clientY-r.top};
+}
+canvas.addEventListener('pointerdown',e=>{
+  drawing=true; canvas.setPointerCapture(e.pointerId);
+  const p=pos(e); ctx.beginPath();ctx.moveTo(p.x,p.y);
+  hasInk=true; placeholder.style.display='none';status.textContent='Firmando…';
+});
+canvas.addEventListener('pointermove',e=>{
+  if(!drawing)return; const p=pos(e); ctx.lineTo(p.x,p.y);ctx.stroke();
+});
+function end(){if(drawing){drawing=false;status.textContent='Firma realizada ✓';}}
+canvas.addEventListener('pointerup',end); canvas.addEventListener('pointercancel',end);
+
+document.getElementById('clear').onclick=()=>{
+  const r=canvas.getBoundingClientRect();ctx.clearRect(0,0,r.width,r.height);
+  hasInk=false;points=[];strokes=0;placeholder.style.display='flex';status.textContent='Listo para comenzar';
+};
+
+let points=[], strokes=0;
+canvas.addEventListener('pointerdown',e=>{
+  strokes++;
+  const p=pos(e); points.push({...p});
+}, {capture:true});
+canvas.addEventListener('pointermove',e=>{
+  if(drawing){const p=pos(e);points.push({...p});}
+}, {capture:true});
+
+function analyzeSignature(){
+  const r=canvas.getBoundingClientRect();
+  if(points.length<3) return;
+
+  const xs=points.map(p=>p.x), ys=points.map(p=>p.y);
+  const minX=Math.min(...xs), maxX=Math.max(...xs), minY=Math.min(...ys), maxY=Math.max(...ys);
+  const w=maxX-minX, h=maxY-minY;
+  const widthRatio=w/r.width, heightRatio=h/r.height;
+
+  const first=points.slice(0,Math.max(2,Math.floor(points.length*.25)));
+  const last=points.slice(Math.floor(points.length*.75));
+  const avg=a=>a.reduce((s,p)=>s+p.y,0)/a.length;
+  const slope=avg(last)-avg(first);
+
+  let size,sizeText,personality;
+  if(widthRatio>.62){
+    size="amplia";
+    sizeText="Tu firma ocupa bastante espacio. En la interpretación grafológica tradicional, esto se asocia con una personalidad expresiva, con ganas de hacerse notar y de participar activamente.";
+    personality="Una personalidad expresiva y con presencia";
+  }else if(widthRatio<.30){
+    size="compacta";
+    sizeText="Tu firma es más contenida. Tradicionalmente se interpreta como una persona observadora, selectiva y que no necesita mostrar todo de sí inmediatamente.";
+    personality="Una personalidad reservada, observadora y selectiva";
+  }else{
+    size="equilibrada";
+    sizeText="Tu firma mantiene una proporción intermedia. En grafología tradicional se interpreta como una búsqueda de equilibrio entre expresarte y mantener cierta privacidad.";
+    personality="Una personalidad equilibrada y adaptable";
+  }
+
+  let direction,directionText,expression;
+  if(slope < -12){
+    direction="ascendente";
+    directionText="El trazo tiende a subir. La interpretación tradicional lo relaciona con entusiasmo, iniciativa y una actitud orientada hacia lo que viene.";
+    expression="Sueles comunicarte con energía y proyectar entusiasmo cuando algo realmente te interesa.";
+  }else if(slope > 12){
+    direction="descendente";
+    directionText="El trazo tiende a bajar. En la tradición grafológica se interpreta como una expresión más pausada, reflexiva o prudente.";
+    expression="Tu manera de expresarte puede ser más tranquila y medida; primero observas y después dices lo que piensas.";
+  }else{
+    direction="estable";
+    directionText="El trazo se mantiene relativamente estable. Tradicionalmente se relaciona con constancia y una forma de actuar bastante regular.";
+    expression="Sueles buscar una comunicación clara y estable, sin exagerar demasiado lo que quieres transmitir.";
+  }
+
+  let presence,presenceText;
+  if(heightRatio>.34){
+    presence="marcada";
+    presenceText="La altura de la firma destaca visualmente. La interpretación tradicional la vincula con expresividad, seguridad para ocupar espacio y una identidad que quieres hacer visible.";
+  }else if(heightRatio<.14){
+    presence="discreta";
+    presenceText="La altura es contenida. Tradicionalmente se interpreta como prudencia, autocontrol y tendencia a observar antes de exponerte.";
+  }else{
+    presence="moderada";
+    presenceText="La altura es moderada. Se suele interpretar como una combinación entre expresividad y autocontrol.";
+  }
+
+  let style,styleText,relationships;
+  if(strokes>=5){
+    style="dinámico";
+    styleText="La cantidad de cambios y trazos da una impresión dinámica. Desde la grafología tradicional, puede asociarse con creatividad, espontaneidad y una personalidad que disfruta darle un toque propio a las cosas.";
+    relationships="En lo social, puedes disfrutar de conversaciones variadas y de personas con las que puedas ser auténtico/a.";
+  }else if(strokes<=2){
+    style="fluido";
+    styleText="La firma utiliza pocos trazos y se ve continua. Tradicionalmente se interpreta como espontaneidad, decisión y preferencia por hacer las cosas de manera directa.";
+    relationships="Al relacionarte, puedes valorar la confianza, la naturalidad y las relaciones que no se sienten forzadas.";
+  }else{
+    style="elaborado";
+    styleText="La firma combina varios trazos. En la interpretación tradicional puede relacionarse con una personalidad detallista, cuidadosa y preocupada por la forma en que presenta sus ideas.";
+    relationships="En tus relaciones puedes fijarte bastante en los detalles y valorar que las personas sean claras contigo.";
+  }
+
+  const traits=[
+    ["🧠 Cómo eres", personality, sizeText],
+    ["💬 Cómo te expresas", expression, directionText],
+    ["🤝 Cómo te relacionas", "Tu estilo social: "+(strokes>=5?"espontáneo y abierto a lo nuevo":strokes<=2?"natural y directo":"atento a los detalles"), relationships],
+    ["✨ Tu estilo personal", "Una presencia "+presence+" y un estilo "+style, presenceText+" "+styleText],
+    ["🚀 Cómo enfrentas lo que viene", direction==="ascendente"?"Con iniciativa y entusiasmo":direction==="estable"?"Con constancia y equilibrio":"Con cautela y reflexión", directionText],
+    ["🎯 Lo que proyectas", presence==="marcada"?"Presencia y expresividad":presence==="discreta"?"Prudencia y reserva":"Equilibrio y autocontrol", presenceText]
+  ];
+
+  document.getElementById('profileHeadline').textContent=personality+".";
+  document.getElementById('traits').innerHTML=traits.map(t=>
+    `<div class="trait"><b>${t[0]} ${t[1]}</b><span>${t[2]}</span></div>`
+  ).join('');
+  document.getElementById('signaturePreview').src=canvas.toDataURL('image/png');
+}
+
+document.getElementById('finish').onclick=()=>{
+  if(!hasInk){alert('Primero dibuja tu firma en el recuadro.');return;}
+  document.getElementById('resultOverlay').classList.add('show');
+  document.getElementById('loadingView').style.display='block';
+  document.getElementById('resultView').style.display='none';
+  setTimeout(()=>{
+    analyzeSignature();
+    document.getElementById('loadingView').style.display='none';
+    document.getElementById('resultView').style.display='block';
+  },1500);
+};
+
+function closeResults(){
+  document.getElementById('resultOverlay').classList.remove('show');
+}
+
+window.addEventListener('resize',resize);
+resize();
+</script>
+
+<div class="result-overlay" id="resultOverlay">
+  <div class="result-card">
+    <div id="loadingView" class="loading">
+      <div class="spinner"></div>
+      <h2>Analizando tu firma…</h2>
+      <p class="result-sub">Observando tamaño, inclinación, dirección y trazos.</p>
+    </div>
+    <div id="resultView" style="display:none">
+      <h2>✨ Tu resultado</h2>
+      <p class="result-sub">Así podría interpretarse tu firma desde la grafología tradicional.</p>
+      <div class="profile-intro">
+        <div class="label">Tu perfil</div>
+        <div class="headline" id="profileHeadline">Tu firma tiene un estilo particular.</div>
+      </div>
+      <div class="signature-preview"><img id="signaturePreview" alt="Tu firma"></div>
+      <div class="traits" id="traits"></div>
+      <p class="disclaimer-mini">Interpretación recreativa: la grafología no permite determinar científicamente la personalidad de una persona.</p>
+      <button class="close-result" onclick="closeResults()">Volver a firmar</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
